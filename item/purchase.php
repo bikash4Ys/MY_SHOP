@@ -20,17 +20,21 @@ $user = $_SESSION['my_shop']['user'];
 $cart_items = $_SESSION['my_shop']['cart'];
 
 // 商品購入
-purchase($pdo, $user, $cart_items);
+purchase($pdo, $user, $cart_items, $_POST['amount']);
 
 // 完了画面にリダイレクト
 header('Location: complete.php');
 
-function purchase($pdo, $user, $cart_items) {
+function purchase($pdo, $user, $cart_items, $item_amounts) {
+    $index = 0;
     foreach ($cart_items as $cart_item) {
+        $amount = $item_amounts[$index];
+        $index++;
+
         $data['user_id'] = $user['id'];
         $data['item_id'] = $cart_item['id'];
-        $data['amount'] = 1;
-        $data['total_price'] = $cart_item['price'] * 1;
+        $data['amount'] = $amount;
+        $data['total_price'] = $cart_item['price'] * $amount;
 
         $sql = "INSERT INTO user_items (user_id, item_id, amount, total_price)
                 VALUES (:user_id, :item_id, :amount, :total_price)";

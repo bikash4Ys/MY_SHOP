@@ -13,22 +13,9 @@ if (!empty($_SESSION['my_shop']['regist'])) {
 $regist = !empty($_SESSION['my_shop']['regist']) ? $_SESSION['my_shop']['regist'] : [];
 $errors = !empty($_SESSION['my_shop']['errors']) ? $_SESSION['my_shop']['errors'] : [];
 
-// Check if email already exists in the database
-if (!empty($regist['email'])) {
-    require_once '../db.php'; // Include your database connection file
-
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email");
-    $stmt->bindParam(':email', $regist['email']);
-    $stmt->execute();
-    $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($existingUser) {
-        $errors['email'] = 'Email is already in use.';
-        $_SESSION['my_shop']['errors'] = $errors;
-        header('Location: input.php'); // Redirect back to input page with error message
-        exit;
-    }
-}
+// セッションのデータを削除
+unset($_SESSION['my_shop']['regist']);
+unset($_SESSION['my_shop']['errors']);
 ?>
 
 <!DOCTYPE html>
@@ -52,9 +39,8 @@ if (!empty($regist['email'])) {
             </div>
             <div>
                 <label class="form-label" for="">Email</label>
-                <input class="form-control" type="text" name="email" value="<?= @$regist['email'] ?>">
+                <input class="form-control" type="email" name="email" value="<?= @$regist['email'] ?>">
                 <div class="text-danger mt-2 mb-2"><?= @$errors['email'] ?></div>
-            </div>
             <div>
                 <label class="form-label" for="">Password</label>
                 <input class="form-control" type="password" name="password">

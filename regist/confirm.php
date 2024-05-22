@@ -1,4 +1,5 @@
 <?php
+
 // POST以外はアクセスできない
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     //強制終了
@@ -25,6 +26,7 @@ if ($errors) {
     header('Location: input.php');
     exit;
 }
+findByEmail($posts['email']);
 
 /**
  * サニタイズ
@@ -38,6 +40,16 @@ function sanitize($posts)
     return $posts;
 }
 
+function findByEmail(string $email)
+{
+    require '../db.php';
+    $sql = "SELECT * FROM users WHERE email = :email;";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['email' => $email]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $user;
+}
+
 function validate(array $posts)
 {
     $errors = [];
@@ -46,9 +58,14 @@ function validate(array $posts)
     }
     if (empty($posts['email'])) {
         $errors['email'] = 'Emailを入力してください';
+    } else if (findByEmail($posts['email'])) {
+        $errors['email'] = 'Emailは既に登録済みです';
     }
+    $pattern = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,12}$/';
     if (empty($posts['password'])) {
         $errors['password'] = 'Passwordを入力してください';
+    } else if (!preg_match($pattern, $posts['password'])) {
+        //$errors['password'] = 'Passwordは大文字、小文字を含む、6文字以上、12文字以内で入力してください。';
     }
     // エラーメッセージを返す
     return $errors;
